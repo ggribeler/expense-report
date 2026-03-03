@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Category } from '../types';
-import { fetchCategories } from '../api/categories';
+import { fetchCategories, createCategory } from '../api/categories';
 import { fetchExpenses, createExpense, updateExpense } from '../api/expenses';
 import { toDateInputValue, fromDateInputValue } from '../utils/dateHelpers';
+import CategoryForm from '../components/CategoryForm';
 import styles from '../styles/ExpenseFormPage.module.css';
 
 export default function ExpenseFormPage() {
@@ -19,6 +20,7 @@ export default function ExpenseFormPage() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(isEdit);
   const [error, setError] = useState('');
+  const [showNewCategory, setShowNewCategory] = useState(false);
 
   useEffect(() => {
     fetchCategories().then(setCategories).catch(() => {});
@@ -85,6 +87,13 @@ export default function ExpenseFormPage() {
     }
   }
 
+  async function handleCreateCategory(data: { name: string; color: string }) {
+    const newCat = await createCategory(data);
+    setCategories((prev) => [...prev, newCat]);
+    setCategoryId(newCat.id);
+    setShowNewCategory(false);
+  }
+
   if (loadingData) return <div className={styles.loading}>Loading...</div>;
 
   return (
@@ -129,16 +138,25 @@ export default function ExpenseFormPage() {
 
         <div className={styles.field}>
           <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            <option value="">No category</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          <div className={styles.categoryFieldRow}>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">No category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className={styles.addCategoryBtn}
+              onClick={() => setShowNewCategory(true)}
+            >
+              + New
+            </button>
+          </div>
         </div>
 
         <div className={styles.actions}>
@@ -150,6 +168,19 @@ export default function ExpenseFormPage() {
           </button>
         </div>
       </form>
+
+      {showNewCategory && (
+        <div className={styles.overlay} onClick={() => setShowNewCategory(false)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h2>New Category</h2>
+            <CategoryForm
+              onSubmit={handleCreateCategory}
+              onCancel={() => setShowNewCategory(false)}
+              submitLabel="Create"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
