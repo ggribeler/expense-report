@@ -37,3 +37,11 @@
   padding: 2rem;
   color: #888;
 }
+
+.summary {
+  text-align: right;
+  padding: 0.5rem 0.75rem;
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}

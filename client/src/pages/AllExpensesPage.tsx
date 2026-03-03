@@ -4,6 +4,7 @@ import type { Category, Expense } from '../types';
 import { fetchExpenses, deleteExpense, type ExpenseFilters } from '../api/expenses';
 import { fetchCategories } from '../api/categories';
 import { fromDateInputValue, endOfDay } from '../utils/dateHelpers';
+import { formatCurrency } from '../utils/constants';
 import FilterBar from '../components/FilterBar';
 import ExpenseListItem from '../components/ExpenseListItem';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
@@ -74,6 +75,13 @@ export default function AllExpensesPage() {
         onChange={setFilters}
         onClear={() => setFilters(EMPTY_FILTERS)}
       />
+
+      {!loading && expenses.length > 0 && (
+        <div className={styles.summary}>
+          {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'} —{' '}
+          {formatCurrency(expenses.reduce((sum, e) => sum + e.value, 0))}
+        </div>
+      )}
 
       {error && <div className={styles.error}>{error}</div>}
       {loading && <div className={styles.loading}>Loading...</div>}
